@@ -1,7 +1,9 @@
 #!/bin/bash
-
+# SCRIPT TO EAT ALL IP ADDRESSES IN A /24
+# SET DEFAULT VALUE
 IFACE="EMPTY"
-# GET COMMAND LINE OPTION
+
+# GET COMMAND LINE OPTION FOR INTERFACE
 while getopts i: option
 do
 case "${option}"
@@ -17,9 +19,8 @@ then
 	exit 1
 fi
 echo $IFACE
-# SCRIPT TO SOAK UP ALL IP ADDRESSES IN SUBNET
 
-# GET CURRENT IP ADDRESS (PRIMARY)
+# GET CURRENT IP ADDRESS FROM PRIMARY INTERFACE
 IP="$(ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')"
 echo $IP
 
